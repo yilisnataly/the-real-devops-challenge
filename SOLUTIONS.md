@@ -42,7 +42,7 @@ ramirezy/flask-challenge        1.0          f606b96795a3   3 hours ago    191MB
 Once the app image is built, we will need to launch a mongodb container with the database connection parameters with the following command:
 ```bash
 sudo docker run -d --name mongodb -p 27017:27017 -v mongo_db:/data/db \
-  -e MONGO_INITDB_DATABASE=db_name \
+  -e MONGO_INITDB_DATABASE=restaurantdb \
   -e MONGO_INITDB_ROOT_USERNAME=user_root_password \
   -e MONGO_INITDB_ROOT_PASSWORD=root_password \
      mongo
@@ -105,4 +105,19 @@ CONTAINER ID   IMAGE                           COMMAND                  CREATED 
 We access the mongo container to create the user and any other parameters for the database.
 ```bash
 docker exec -it mongodb bash
+```
+Once inside we log in the Mongodb shell with authentication
+```bash
+oot@7dd46da27695:/# mongo -u user_root_password -p root_password --authenticationDatabase admin restaurantdb
+MongoDB shell version v5.0.9
+connecting to: mongodb://127.0.0.1:27017/restaurantdb?authSource=admin&compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("3484164e-9da1-4719-864a-f7f2fd6430e5") }
+MongoDB server version: 5.0.9
+================
+Warning: the "mongo" shell has been superseded by "mongosh",
+which delivers improved usability and compatibility.The "mongo" shell has been deprecated and will be removed in
+an upcoming release.
+For installation instructions, see
+https://docs.mongodb.com/mongodb-shell/install/
+================
 ```
