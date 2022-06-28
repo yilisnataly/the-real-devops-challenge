@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaskapp-deployment
+  namespace: flask-app
+  labels:
+    app: flaskapp
+spec:
+  selector:
+    matchLabels:
+      app: flaskapp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      containers:
+        - name: flask
+          image: ramirezy/flask-challenge:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: rootpassword
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: flaskapp-cm
+                  key: dbname
+            - name: MONGODB_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: flaskapp-cm
+                  key: host
+            - name: MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: flaskapp-cm
+                  key: port

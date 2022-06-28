@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: flask-app
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - image: mongo:5.0.9
+        name: mongo
+        env:
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: rootpassword
+        - name: MONGO_INITDB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: flaskapp-cm
+              key: dbname
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: username
+        ports:
+        - containerPort: 27017
+          name: mongo
+        volumeMounts:
+        - name: mongo-persistent
+          mountPath: /data/db
+      volumes:
+      - name: mongo-persistent
+        persistentVolumeClaim:
+          claimName: mongo-pv-claim

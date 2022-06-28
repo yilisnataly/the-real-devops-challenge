@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  dbname: restaurantdb
+  host: mongodb
+  port: "27017"
+kind: ConfigMap
+metadata:
+  name: flaskapp-cm
+  namespace: flask-app
