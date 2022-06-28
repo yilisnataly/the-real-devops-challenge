@@ -158,3 +158,30 @@ After we have inserted all the required data in the database container, we can p
 http://127.0.0.1:8080/api/v1/restaurant
 ```
 ![endpoint_api](https://user-images.githubusercontent.com/39458920/176285697-52e4a4f9-18c6-4280-9a4e-71cc72a50a83.JPG)
+
+# Final Challenge. Deploy it on kubernetes
+Checking that all manifests have been deployed in Kubernetes and they are running properly.
+
+```bash
+ubectl get all -n flask-app             
+NAME                                       READY   STATUS    RESTARTS   AGE
+pod/flaskapp-deployment-5c4b7bb67f-h7tfc   1/1     Running   0          4h17m
+pod/mongodb-76c4459dd7-vvzpp               1/1     Running   0          9h
+
+NAME                    TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+service/flask-service   LoadBalancer   10.245.55.147   167.99.17.1   8080:32203/TCP   9h
+service/mongodb         ClusterIP      None            <none>        27017/TCP        9h
+
+NAME                                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/flaskapp-deployment   1/1     1            1           4h28m
+deployment.apps/mongodb               1/1     1            1           9h
+
+NAME                                             DESIRED   CURRENT   READY   AGE
+replicaset.apps/flaskapp-deployment-5c4b7bb67f   1         1         1       4h17m
+replicaset.apps/flaskapp-deployment-7c96fc7b8    0         0         0       4h28m
+replicaset.apps/mongodb-76c4459dd7               1         1         1       9h
+
+NAME                                           REFERENCE                        TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
+horizontalpodautoscaler.autoscaling/flask-ha   Deployment/flaskapp-deployment   <unknown>/80%   1         10        1          3h55m
+```
+
