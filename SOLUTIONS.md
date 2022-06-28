@@ -37,11 +37,55 @@ docker images
 REPOSITORY                      TAG          IMAGE ID       CREATED        SIZE
 ramirezy/flask-challenge        1.0          f606b96795a3   3 hours ago    191MB
 ```
-Once the app image is built, we will need to launch a container with the database connection parameters with the following command:
+
+# Challenge 4. Dockerize the database
+Once the app image is built, we will need to launch a mongodb container with the database connection parameters with the following command:
 ```bash
 sudo docker run -d --name mongodb -p 27017:27017 -v mongo_db:/data/db \
   -e MONGO_INITDB_DATABASE=db_name \
   -e MONGO_INITDB_ROOT_USERNAME=user_root_password \
   -e MONGO_INITDB_ROOT_PASSWORD=root_password \
      mongo
+ ```
+# Challenge 5. Docker Compose it
+
+```bash
+version: '3.9'
+
+services:
+  app:
+    build: .
+    command: python -u app.py
+    #image: ramirezy/flask-challenge
+    container_name: flask
+    restart: unless-stopped
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+     MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+     MONGODB_HOSTNAME: ${MONGODB_HOSTNAME}
+     MONGODB_PORT: ${MONGODB_PORT}
+    ports:
+     - 8080:8080
+    depends_on:
+      - mongodb
+    volumes:
+      - ./app.py:/app/app.py
+  mongodb:
+    image: mongo:5.0.9
+    container_name: mongodb
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+     MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+
+    ports:
+     - 27017:27017
+    volumes:
+     - /mongo_db:/data/db
+
+volumes:
+ mongo_db:
  ```
