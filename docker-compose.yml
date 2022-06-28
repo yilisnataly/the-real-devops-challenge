@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    command: python -u app.py
+    #image: ramirezy/flask-challenge
+    container_name: flask
+    restart: unless-stopped
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+     MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+     MONGODB_HOSTNAME: ${MONGODB_HOSTNAME}
+     MONGODB_PORT: ${MONGODB_PORT}
+    ports:
+     - 8080:8080
+    depends_on:
+      - mongodb
+    volumes:
+      - ./app.py:/app/app.py
+  mongodb:
+    image: mongo:5.0.9
+    container_name: mongodb
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+     MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+
+    ports:
+     - 27017:27017
+    volumes:
+     - /mongo_db:/data/db
+     - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js
+
+volumes:
+ mongo_db:
