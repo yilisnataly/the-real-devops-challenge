@@ -43,7 +43,7 @@ Once the app image is built, we will need to launch a mongodb container with the
 ```bash
 sudo docker run -d --name mongodb -p 27017:27017 -v mongo_db:/data/db \
   -e MONGO_INITDB_DATABASE=restaurantdb \
-  -e MONGO_INITDB_ROOT_USERNAME=user_root_password \
+  -e MONGO_INITDB_ROOT_USERNAME=user_root \
   -e MONGO_INITDB_ROOT_PASSWORD=root_password \
      mongo
  ```
@@ -108,7 +108,7 @@ docker exec -it mongodb bash
 ```
 Once inside we log in the Mongodb shell with authentication
 ```bash
-oot@7dd46da27695:/# mongo -u user_root_password -p root_password --authenticationDatabase admin restaurantdb
+oot@7dd46da27695:/# mongo -u user_root -p root_password --authenticationDatabase admin restaurantdb
 MongoDB shell version v5.0.9
 connecting to: mongodb://127.0.0.1:27017/restaurantdb?authSource=admin&compressors=disabled&gssapiServiceName=mongodb
 Implicit session: session { "id" : UUID("3484164e-9da1-4719-864a-f7f2fd6430e5") }
@@ -120,4 +120,35 @@ an upcoming release.
 For installation instructions, see
 https://docs.mongodb.com/mongodb-shell/install/
 ================
+```
+We double checked the database has been created
+```bash
+show dbs
+admin         0.000GB
+config        0.000GB
+local         0.000GB
+restaurantdb  0.000GB
+```
+We created the user as follows:
+```bash
+db.createUser({
+  user: 'mongoadmin',
+  pwd: 'secretpassw',
+  roles: [
+    {
+      role: 'readWrite',
+      db: 'restaurantdb',
+    },
+  ],
+});
+```
+The collection is created with the name `restaurant` as requested `db.createCollection("restaurant")`
+
+As next step we will import the restaurant dataset to load the mongodb collection, hence we copy it into the mongo container.
+```bash
+docker cp restaurant.json mongodb:/
+```
+We import the collection with the following command shown below:
+```bash
+mongoimport --username user_root --password root_password --authenticationDatabase admin --db restaurantdb --collection restaurant --file restaurant.json
 ```
