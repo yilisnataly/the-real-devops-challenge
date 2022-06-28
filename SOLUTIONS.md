@@ -48,7 +48,9 @@ sudo docker run -d --name mongodb -p 27017:27017 -v mongo_db:/data/db \
      mongo
  ```
 # Challenge 5. Docker Compose it
+The docker compose is created to deploy the application and the database with the corresponding environment variables.
 
+In the `docker-compose.yml` file, the values of the environment variables have been parameterized with a file called file.env, but it has been included in the `.gitignore` file, since it is vulnerable information of the database.
 ```bash
 version: '3.9'
 
