@@ -132,8 +132,8 @@ restaurantdb  0.000GB
 We created the user as follows:
 ```bash
 db.createUser({
-  user: 'mongoadmin',
-  pwd: 'secretpassw',
+  user: 'user_root',
+  pwd: 'root_password',
   roles: [
     {
       role: 'readWrite',
