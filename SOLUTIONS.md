@@ -91,3 +91,18 @@ services:
 volumes:
  mongo_db:
  ```
+To run it, we type the command `docker-compose --env-file file.env up -d`
+
+Now we can test the endpoint by typing the URL `http://127.0.0.1:8080/api/v1/restaurant` on your browser, but you will not see anything due we will need to insert the database data. 
+
+Once the build process is completed, we launch the following command to list the running containers:
+```bash
+docker ps                                                                                                                          
+CONTAINER ID   IMAGE                           COMMAND                  CREATED       STATUS       PORTS                                           NAMES
+348cb7a987f2   the-real-devops-challenge_app   "python -u app.py"       4 hours ago   Up 4 hours   0.0.0.0:8080->8080/tcp, :::8080->8080/tcp       flask
+7dd46da27695   mongo:5.0.9                     "docker-entrypoint.s…"   4 hours ago   Up 4 hours   0.0.0.0:27017->27017/tcp, :::27017->27017/tcp   mongodb
+```
+We access the mongo container to create the user and any other parameters for the database.
+```bash
+docker exec -it mongodb bash
+```
