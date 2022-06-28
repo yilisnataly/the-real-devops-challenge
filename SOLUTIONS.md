@@ -152,3 +152,9 @@ We import the collection with the following command shown below:
 ```bash
 mongoimport --username user_root --password root_password --authenticationDatabase admin --db restaurantdb --collection restaurant --file restaurant.json
 ```
+# Running the app
+After we have inserted all the required data in the database container, we can proceed to run it.
+```bash
+http://127.0.0.1:8080/api/v1/restaurant
+```
+![endpoint_api](https://user-images.githubusercontent.com/39458920/176285697-52e4a4f9-18c6-4280-9a4e-71cc72a50a83.JPG)
