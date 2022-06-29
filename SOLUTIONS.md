@@ -188,7 +188,7 @@ horizontalpodautoscaler.autoscaling/flask-ha   Deployment/flaskapp-deployment   
 
 The ingress controller will be used to be able to access to the application, which it works as inverse proxy, so will have to install it in our kubernetes cluster.
 
-The ingress controller can be found in the offical web, as per the cluster provider. In our case it's should be specified for Digital Ocean:
+The ingress controller can be found in the offical web <a href="https://kubernetes.github.io/ingress-nginx/deploy/#digital-ocean">here </a> </li>, as per the cluster provider. In our case it's should be specified for Digital Ocean:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.0/deploy/static/provider/do/deploy.yaml
