@@ -184,4 +184,15 @@ replicaset.apps/mongodb-76c4459dd7               1         1         1       9h
 NAME                                           REFERENCE                        TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
 horizontalpodautoscaler.autoscaling/flask-ha   Deployment/flaskapp-deployment   <unknown>/80%   1         10        1          3h55m
 ```
+<b>Ingress Controller installation</b>
+
+The ingress controller will be used to be able to access to the application, which it works as inverse proxy, so will have to install it in our kubernetes cluster.
+
+The ingress controller can be found in the offical web, as per the cluster provider. In our case it's should be specified for Digital Ocean:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.0/deploy/static/provider/do/deploy.yaml
+```
+
+As result, a namespace is created as `ingress-nginx`
 
