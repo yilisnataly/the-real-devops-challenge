@@ -194,5 +194,35 @@ The ingress controller can be found in the offical web <a href="https://kubernet
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.2.0/deploy/static/provider/do/deploy.yaml
 ```
 
-As result, a namespace is created as `ingress-nginx`
+As result, a namespace is created as `ingress-nginx` where we can find all resources created.
 
+<b>Host service Host nip.io</b>
+
+Now we need to deploy the ingress object to relate the host where we will be accessing toward our app, so the DNS resolution service nip.io will be used.
+
+In the manifest below we reference the host as `practica.64.225.82.140.nip.io` which will resolve the mentioned IP with the service nip.io.
+
+Beside, it is also needed to indicate the annotation: `nginx.ingress.kubernetes.io/rewrite-target: /api/v1/restaurant`, since the app response to the endpoint `/api/v1/restaurant`
+
+```bash
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flask-ingress
+  namespace: flask-app
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /api/v1/restaurant
+spec:
+  rules:
+  - host: practica.64.225.82.140.nip.io
+    http:
+      paths:
+      - path: '/'
+        pathType: Prefix
+        backend:
+          service:
+            name: flask-service
+            port:
+              number: 8080
+ ```
