@@ -200,7 +200,7 @@ As result, a namespace is created as `ingress-nginx` where we can find all resou
 
 Now we need to deploy the ingress object to relate the host where we will be accessing toward our app, so the DNS resolution service nip.io will be used.
 
-In the manifest below we reference the host as `practica.64.225.82.140.nip.io` which will resolve the mentioned IP with the service nip.io.
+In the manifest below we reference the host as `practica.64.225.82.140.nip.io` which will resolve the mentioned IP with the service nip.io. For further info you can check <a href="https://nip.io/">here </a> </li>
 
 Beside, it is also needed to indicate the annotation: `nginx.ingress.kubernetes.io/rewrite-target: /api/v1/restaurant`, since the app response to the endpoint `/api/v1/restaurant`
 
