@@ -160,6 +160,199 @@ http://127.0.0.1:8080/api/v1/restaurant
 ![endpoint_api](https://user-images.githubusercontent.com/39458920/176285697-52e4a4f9-18c6-4280-9a4e-71cc72a50a83.JPG)
 
 # Final Challenge. Deploy it on kubernetes
+To run the deployment file we need to create the configmap and the secret to store the vulnerable data. Regarding the secret info should be encoded with Base64.
+
+```bash
+apiVersion: v1
+data:
+  dbname: restaurantdb
+  host: mongodb
+  port: "27017"
+kind: ConfigMap
+metadata:
+  name: flaskapp-cm
+  namespace: flask-app
+```
+Note that the secret was added in the .gitignore file to not make it visible.
+
+```bash
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mongo-secret
+  namespace: flask-app
+type: Opaque
+data:
+  rootpassword:
+  username:
+```
+# Running Flask app in Kubernetes
+
+Now we set the environment variales in this deployment, using the values specified in the secret and configmap file. The flask image was built from Dockerfile configuration. The spec section defines the pod where we specify the image to be pulled and run. The port 8080 of the Pod is exposed.
+
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flaskapp-deployment
+  namespace: flask-app
+  labels:
+    app: flaskapp
+spec:
+  selector:
+    matchLabels:
+      app: flaskapp
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: flaskapp
+    spec:
+      containers:
+        - name: flask
+          image: ramirezy/flask-challenge:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: username
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-secret
+                  key: rootpassword
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: flaskapp-cm
+                  key: dbname
+            - name: MONGODB_HOSTNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: flaskapp-cm
+                  key: host
+            - name: MONGODB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: flaskapp-cm
+                  key: port
+  ```
+The LoadBalancer Service enables the pods in a deployment to be accessible from outside the cluster. The advantage of using a Service is that it gives us a single consistent IP to access our app as many pods may come and go in our deployment.
+  
+ ```bash
+ apiVersion: v1
+kind: Service
+metadata:
+  name: flask-service
+  namespace: flask-app
+  labels:
+    app: flaskapp
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: flaskapp
+  type: LoadBalancer
+  ```
+ # Running Mongodb in Kubernetes
+ Now let's provide persistence to the database with Persistent Volume Claim. For this is needed to check the storage classes from the cluster.
+ According to the output below, it seems to be :
+ kubectl get storageclasses.storage.k8s.io
+
+Now we can define the manifest for Persistent Volume Claim:
+
+```bash
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pv-claim
+  namespace: flask-app
+spec:
+  storageClassName: do-block-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+ ```
+ As you can see Persistent Volume Claim has been successfully created and bound.
+
+kubectl get pvc -n flask-app
+
+
+Additionally, we can see persistent volume is automatically created.
+
+The `deployment-mongo.yaml` is where we define the mongo deployment that creates a single instance of MongoDB server. Here, we expose the port 27017 which can be accessed by other pods. We also defined the database connection parameters through environment variables.
+
+```bash
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+  namespace: flask-app
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - image: mongo:5.0.9
+        name: mongo
+        env:
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: rootpassword
+        - name: MONGO_INITDB_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: flaskapp-cm
+              key: dbname
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mongo-secret
+              key: username
+        ports:
+        - containerPort: 27017
+          name: mongo
+        volumeMounts:
+        - name: mongo-persistent
+          mountPath: /data/db
+      volumes:
+      - name: mongo-persistent
+        persistentVolumeClaim:
+          claimName: mongo-pv-claim
+ ```
+ Creating a service to provide MongoDB access towards Flask app or any other pod inside the cluster.
+
+ ```bash
+ apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: flask-app
+spec:
+  ports:
+  - port: 27017
+  selector:
+    app: mongodb
+  clusterIP: None
+  ```
+
 Checking that all manifests have been deployed in Kubernetes and they are running properly.
 
 ```bash
