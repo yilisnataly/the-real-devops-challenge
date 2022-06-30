@@ -93,7 +93,7 @@ volumes:
  ```
 To run it, we type the command `docker-compose --env-file file.env up -d`
 
-Now we can test the endpoint by typing the URL `http://127.0.0.1:8080/api/v1/restaurant` on your browser, but you will not see anything due we will need to insert the database data. 
+Now we can test the endpoint by typing the URL `http://127.0.0.1:8080/api/v1/restaurant` on the browser, but we will not see anything due we will need to insert the database data. 
 
 Once the build process is completed, we launch the following command to list the running containers:
 ```bash
