@@ -161,10 +161,15 @@ http://127.0.0.1:8080/api/v1/restaurant
 
 # Final Challenge. Deploy it on kubernetes
 
-<b>Prerequisite:</b> A Kubernetes cluster needs to be created, hence we have enabled it through a managed Kubernetes service by <b>Digital Ocean</b>. Here, is being used a cluster consisting 1 master and 3 workers.
-
-To deploy our application on a Kubernetes cluster, we will be creating .yaml files for each Kubernetes resource. The resources are to be deployed as follows:
-
+<b>Prerequisite:</b> A Kubernetes cluster needs to be created, hence we have enabled it through a managed Kubernetes service by <b>Digital Ocean</b>. Here, is being used a cluster consisting 3 workers.
+```bash
+kubectl get nodes
+NAME                   STATUS   ROLES    AGE     VERSION
+pool-fgl2z6ddg-ckj2b   Ready    <none>   2d13h   v1.22.8
+pool-fgl2z6ddg-ckj2j   Ready    <none>   2d13h   v1.22.8
+pool-fgl2z6ddg-ckj2r   Ready    <none>   2d13h   v1.22.8
+```
+To deploy our application on a Kubernetes cluster, we will be creating <b>.yaml</b> files for each Kubernetes resource. The resources are to be deployed as follows:
 
 To run the deployment file we need to create the configmap and the secret to store the vulnerable data. Regarding the secret info should be encoded with Base64.
 
@@ -268,8 +273,13 @@ spec:
   ```
  # Running Mongodb in Kubernetes
  Now let's provide persistence to the database with Persistent Volume Claim. For this is needed to check the storage classes from the cluster.
- According to the output below, it seems to be :
- kubectl get storageclasses.storage.k8s.io
+ According to the output below, it seems to be `do-block-storage`:
+ 
+```bash
+kubectl get storageclasses.storage.k8s.io
+NAME                         PROVISIONER                 RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
+do-block-storage (default)   dobs.csi.digitalocean.com   Delete          Immediate           true                   2d13h
+```
 
 Now we can define the manifest for Persistent Volume Claim:
 
@@ -289,13 +299,18 @@ spec:
  ```
  As you can see Persistent Volume Claim has been successfully created and bound.
 
+```bash
 kubectl get pvc -n flask-app
-
+NAME             STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS       AGE
+mongo-pv-claim   Bound    pvc-a156d1cb-a9a5-430f-a841-9d0461f03a67   5Gi        RWO            do-block-storage   45h
+```
 
 Additionally, we can see persistent volume is automatically created.
-
+```bash
 kubectl get persistentvolume
-
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                      STORAGECLASS       REASON   AGE
+pvc-a156d1cb-a9a5-430f-a841-9d0461f03a67   5Gi        RWO            Delete           Bound    flask-app/mongo-pv-claim   do-block-storage            45h
+```
 The `deployment-mongo.yaml` is where we define the mongo deployment that creates a single instance of MongoDB server. Here, we expose the port 27017 which can be accessed by other pods. We also defined the database connection parameters through environment variables.
 
 ```bash
@@ -426,25 +441,5 @@ spec:
             name: flask-service
             port:
               number: 8080
- ```
- 
- # Horizontal Autoscaling
- 
- We have implemented the following autoscaling for the application Pod in case it needs more load, then HPA will increase more pods automatically.
-
-```bash
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: flask-ha
-  namespace: flask-app
-spec:
-  scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: flaskapp-deployment
-  minReplicas: 1
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 80
  ```
 
