@@ -400,6 +400,13 @@ replicaset.apps/mongodb-76c4459dd7               1         1         1       9h
 NAME                                           REFERENCE                        TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
 horizontalpodautoscaler.autoscaling/flask-ha   Deployment/flaskapp-deployment   <unknown>/80%   1         10        1          3h55m
 ```
+# Inserting data in Kubernetes POD
+We check the Mongo POD and proceed to access it to create the database `restaurantdb`, create the user, and import the dataset called `restaurant`
+
+```bash
+kubectl -n flask-app exec --stdin --tty mongodb-76c4459dd7-vvzpp -- /bin/sh
+```
+
 # Ingress Controller installation
 
 The ingress controller will be used to be able to access to the application, which it works as inverse proxy, so will have to install it in our kubernetes cluster.
@@ -442,4 +449,36 @@ spec:
             port:
               number: 8080
  ```
+
+Checking whole the ingress resources
+
+```bash
+kubectl get all --namespace=ingress-nginx
+NAME                                            READY   STATUS      RESTARTS   AGE
+pod/ingress-nginx-admission-create--1-g8c7b     0/1     Completed   0          41h
+pod/ingress-nginx-admission-patch--1-6jdkg      0/1     Completed   0          41h
+pod/ingress-nginx-controller-5849c9f946-w926r   1/1     Running     0          41h
+
+NAME                                         TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                      AGE
+service/ingress-nginx-controller             LoadBalancer   10.245.2.243    64.225.82.140   80:31422/TCP,443:31281/TCP   41h
+service/ingress-nginx-controller-admission   ClusterIP      10.245.50.161   <none>          443/TCP                      41h
+
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/ingress-nginx-controller   1/1     1            1           41h
+
+NAME                                                  DESIRED   CURRENT   READY   AGE
+replicaset.apps/ingress-nginx-controller-5849c9f946   1         1         1       41h
+
+NAME                                       COMPLETIONS   DURATION   AGE
+job.batch/ingress-nginx-admission-create   1/1           3s         41h
+job.batch/ingress-nginx-admission-patch    1/1           4s         41h
+```
+We check the host and verified that we are able to access it.
+```bash
+kubectl get ingress -n flask-app  
+NAME            CLASS    HOSTS                           ADDRESS         PORTS   AGE
+flask-ingress   <none>   practica.64.225.82.140.nip.io   64.225.82.140   80      41h
+```
+![endpoint_k8s](https://user-images.githubusercontent.com/39458920/176661829-9648703c-90c7-47ac-afae-85fd3737793f.JPG)
+
 
