@@ -160,6 +160,12 @@ http://127.0.0.1:8080/api/v1/restaurant
 ![endpoint_api](https://user-images.githubusercontent.com/39458920/176285697-52e4a4f9-18c6-4280-9a4e-71cc72a50a83.JPG)
 
 # Final Challenge. Deploy it on kubernetes
+
+<b>Prerequisite:</b> A Kubernetes cluster needs to be created, hence we have enabled it through a managed Kubernetes service by <b>Digital Ocean</b>. Here, is being used a cluster consisting 1 master and 3 workers.
+
+To deploy our application on a Kubernetes cluster, we will be creating .yaml files for each Kubernetes resource. The resources are to be deployed as follows:
+
+
 To run the deployment file we need to create the configmap and the secret to store the vulnerable data. Regarding the secret info should be encoded with Base64.
 
 ```bash
@@ -188,7 +194,7 @@ data:
 ```
 # Running Flask app in Kubernetes
 
-Now we set the environment variales in this deployment, using the values specified in the secret and configmap file. The flask image was built from Dockerfile configuration. The spec section defines the pod where we specify the image to be pulled and run. The port 8080 of the Pod is exposed.
+Now we set the environment variables in this deployment, using the values specified in the secret and configmap file. The flask image was built from Dockerfile configuration. The spec section defines the pod where we specify the image to be pulled and run. The port 8080 of the Pod is exposed.
 
 ```bash
 apiVersion: apps/v1
@@ -288,6 +294,8 @@ kubectl get pvc -n flask-app
 
 Additionally, we can see persistent volume is automatically created.
 
+kubectl get persistentvolume
+
 The `deployment-mongo.yaml` is where we define the mongo deployment that creates a single instance of MongoDB server. Here, we expose the port 27017 which can be accessed by other pods. We also defined the database connection parameters through environment variables.
 
 ```bash
@@ -377,7 +385,7 @@ replicaset.apps/mongodb-76c4459dd7               1         1         1       9h
 NAME                                           REFERENCE                        TARGETS         MINPODS   MAXPODS   REPLICAS   AGE
 horizontalpodautoscaler.autoscaling/flask-ha   Deployment/flaskapp-deployment   <unknown>/80%   1         10        1          3h55m
 ```
-<b>Ingress Controller installation</b>
+# Ingress Controller installation
 
 The ingress controller will be used to be able to access to the application, which it works as inverse proxy, so will have to install it in our kubernetes cluster.
 
@@ -389,9 +397,9 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/cont
 
 As result, a namespace is created as `ingress-nginx` where we can find all resources created.
 
-<b>Host service Host nip.io</b>
+# Host service Host nip.io
 
-Now we need to deploy the ingress object to relate the host where we will be accessing toward our app, so the DNS resolution service nip.io will be used.
+Now we need to deploy the ingress object to relate the host where we will be accessing toward our app, so the DNS resolution service <b>nip.io</b> will be used.
 
 In the manifest below we reference the host as `practica.64.225.82.140.nip.io` which will resolve the mentioned IP with the service nip.io. For further info you can check <a href="https://nip.io/">here </a> </li>
 
@@ -419,3 +427,24 @@ spec:
             port:
               number: 8080
  ```
+ 
+ # Horizontal Autoscaling
+ 
+ We have implemented the following autoscaling for the application Pod in case it needs more load, then HPA will increase more pods automatically.
+
+```bash
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: flask-ha
+  namespace: flask-app
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: flaskapp-deployment
+  minReplicas: 1
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+ ```
+
