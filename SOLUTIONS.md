@@ -481,4 +481,11 @@ flask-ingress   <none>   practica.64.225.82.140.nip.io   64.225.82.140   80     
 ```
 ![endpoint_k8s](https://user-images.githubusercontent.com/39458920/176661829-9648703c-90c7-47ac-afae-85fd3737793f.JPG)
 
-
+# Applying manifests
+```bash
+kubectl apply -f ./k8s  
+```
+# Removing resources
+```bash
+kubectl delete -f ./k8s
+```
