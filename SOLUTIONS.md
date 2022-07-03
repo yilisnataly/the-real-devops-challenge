@@ -1,5 +1,59 @@
 # Solutions in relation to the real DevOps challenge
 
+# Challenge 2. Test the application in any cicd system
+The application has been tested with GitHub actions, s
+```bash
+flake8:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+    - name:  Checkout code
+      uses: actions/checkout@v2
+    
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Lint with flake8
+      run: |
+        pip install flake8 flake8-html
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        mkdir -p reports/flake8
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=79 --statistics --format=html --htmldir=reports/flake8
+    - name: Archive flake8 coverage results
+      uses: actions/upload-artifact@v2
+      with:
+        name: flake8-coverage-report
+        path: reports/flake8/
+  ```
+  
+  ```bash
+   pytest:
+    name: Unit Testing
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements_dev.txt
+    - name: Test with pytest
+      run: |
+        pip install pytest pytest-cov pytest-html pytest-sugar pytest-json-report
+        pytest -v --cov --html=reports/pytest/report.html
+    - name: Archive pytest coverage results
+      uses: actions/upload-artifact@v2
+      with:
+        name: pytest-coverage-report
+        path: reports/pytest
+     ```
+
 # Challenge 3. Dockerize the APP
 
 A docker image is built through Dockerfile in order to run a docker container for flask app.
@@ -23,7 +77,7 @@ ENV FLASK_RUN_HOST=0.0.0.0
 CMD ["python3", "app.py"]
 ```
 
-We have run the docker build command to create the app image.
+We have to run the docker build command to create the app image.
 ```bash
 docker build -t ramirezy/flask-challenge:1.0 .
 ```
