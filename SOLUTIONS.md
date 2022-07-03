@@ -1,4 +1,4 @@
-# Solutions in relation to the real DevOps challenge
+# Solutions in relation to the real DevOps challenge  👩🏾‍💻
 
 # Challenge 2. Test the application in any cicd system
 The application has been tested with GitHub actions, where a workflow has been implemented to verify possible code errors, through static code analysis with Flake8. On the other hand, it launches unit tests to the application.
@@ -544,3 +544,5 @@ kubectl apply -f ./k8s
 ```bash
 kubectl delete -f ./k8s
 ```
+
+#### Thank You 🙏🏼
