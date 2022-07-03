@@ -52,7 +52,7 @@ flake8:
       with:
         name: pytest-coverage-report
         path: reports/pytest
-     ```
+  ```
 
 # Challenge 3. Dockerize the APP
 
